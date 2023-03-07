@@ -5,6 +5,9 @@ Study Case: Match-3
 Author: Alejandro Mujica
 alejandro.j.mujic4@gmail.com
 
+Author: Kevin Márquez
+marquezberriosk@gmail.com
+
 This file contains the game settings that include the association of the
 inputs with an their ids, constants of values to set up the game, sounds,
 textures, frames, and fonts.
@@ -24,8 +27,8 @@ input_handler.InputHandler.set_keyboard_action(input_handler.KEY_UP, "up")
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_DOWN, "down")
 input_handler.InputHandler.set_mouse_click_action(input_handler.MOUSE_BUTTON_1, "click")
 
-WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
+WINDOW_WIDTH = 1024
+WINDOW_HEIGHT = 600
 
 VIRTUAL_WIDTH = 512
 VIRTUAL_HEIGHT = 288
