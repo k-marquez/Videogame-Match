@@ -130,72 +130,96 @@ class PlayState(BaseState):
     def on_input(self, input_id: str, input_data: InputData) -> None:
         if not self.active:
             return
-
-        pos_x, pos_y = input_data.position
-        pos_x = pos_x * settings.VIRTUAL_WIDTH // settings.WINDOW_WIDTH
-        pos_y = pos_y * settings.VIRTUAL_HEIGHT // settings.WINDOW_HEIGHT
-        i = (pos_y - self.board.y) // settings.TILE_SIZE
-        j = (pos_x - self.board.x) // settings.TILE_SIZE
         
-        if input_id == "click" and input_data.pressed:
+        if input_id == "click":
+            
+            pos_x, pos_y = self.__to_virtual_pos(input_data)
+            i, j = self.__to_index(pos_x, pos_y)
+
             if 0 <= i < settings.BOARD_HEIGHT and 0 <= j <= settings.BOARD_WIDTH:
-                if not self.highlighted_tile:
+                if input_data.pressed and not self.highlighted_tile:
                     self.highlighted_tile = True
                     self.highlighted_i1 = i
                     self.highlighted_j1 = j
-                    self.highlighted_x = self.board.tiles[i][j].x
-                    self.highlighted_y = self.board.tiles[i][j].y
                
-        elif input_id == "click" and input_data.released and self.highlighted_tile:
-            if 0 <= i < settings.BOARD_HEIGHT and 0 <= j <= settings.BOARD_WIDTH:    
-                self.highlighted_j2 = j
-                self.highlighted_i2 = i
-                
-                di = abs(self.highlighted_i2 - self.highlighted_i1)
-                dj = abs(self.highlighted_j2 - self.highlighted_j1)
-                
-                if di <= 1 and dj <= 1 and di != dj:
-                    self.active = False
-                    tile1 = self.board.tiles[self.highlighted_i1][
-                        self.highlighted_j1
-                    ]
-                    tile2 = self.board.tiles[self.highlighted_i2][
-                        self.highlighted_j2
-                    ]
-                
-                    def arrive():
+                elif input_data.released and self.highlighted_tile:
+                    self.highlighted_j2 = j
+                    self.highlighted_i2 = i
+                    
+                    di = abs(self.highlighted_i2 - self.highlighted_i1)
+                    dj = abs(self.highlighted_j2 - self.highlighted_j1)
+                    
+                    if di <= 1 and dj <= 1 and di != dj:
+                        self.active = False
                         tile1 = self.board.tiles[self.highlighted_i1][
                             self.highlighted_j1
                         ]
                         tile2 = self.board.tiles[self.highlighted_i2][
                             self.highlighted_j2
                         ]
-                        (
-                            self.board.tiles[tile1.i][tile1.j],
-                            self.board.tiles[tile2.i][tile2.j],
-                        ) = (
-                            self.board.tiles[tile2.i][tile2.j],
-                            self.board.tiles[tile1.i][tile1.j],
+                    
+                        def arrive():
+                            tile1 = self.board.tiles[self.highlighted_i1][
+                                self.highlighted_j1
+                            ]
+                            tile2 = self.board.tiles[self.highlighted_i2][
+                                self.highlighted_j2
+                            ]
+                            (
+                                self.board.tiles[tile1.i][tile1.j],
+                                self.board.tiles[tile2.i][tile2.j],
+                            ) = (
+                                self.board.tiles[tile2.i][tile2.j],
+                                self.board.tiles[tile1.i][tile1.j],
+                            )
+                            tile1.i, tile1.j, tile2.i, tile2.j = (
+                                tile2.i,
+                                tile2.j,
+                                tile1.i,
+                                tile1.j,
+                            )
+                            self.__calculate_matches([tile1, tile2])
+                    
+                        # Swap tiles
+                        Timer.tween(
+                            0.25,
+                            [
+                                (tile1, {"x": tile2.x, "y": tile2.y}),
+                                (tile2, {"x": self.highlighted_j1 * settings.TILE_SIZE,
+                                         "y": self.highlighted_i1 * settings.TILE_SIZE}),
+                            ],
+                            on_finish=arrive,
                         )
-                        tile1.i, tile1.j, tile2.i, tile2.j = (
-                            tile2.i,
-                            tile2.j,
-                            tile1.i,
-                            tile1.j,
-                        )
-                        self.__calculate_matches([tile1, tile2])
-                
-                    # Swap tiles
-                    Timer.tween(
-                        0.25,
-                        [
-                            (tile1, {"x": tile2.x, "y": tile2.y}),
-                            (tile2, {"x": self.highlighted_x, "y": self.highlighted_y}),
-                        ],
-                        on_finish=arrive,
-                    )
 
-            self.highlighted_tile = False
+                    self.__get_back_last_move()
+             
+        elif input_id == "mouse_motion" and self.highlighted_tile:
+            pos_x, pos_y = self.__to_virtual_pos(input_data)
+            i, j = self.__to_index(pos_x, pos_y)
+            if abs(i - self.highlighted_i1) < 2 and abs(j - self.highlighted_j1) < 2:
+                self.board.tiles[self.highlighted_i1][self.highlighted_j1].x = pos_x - settings.TILE_SIZE / 2
+                self.board.tiles[self.highlighted_i1][self.highlighted_j1].y =  pos_y - settings.TILE_SIZE / 2
+            
+            else:
+                self.__get_back_last_move()
+
+    def __get_back_last_move(self) -> None:
+        self.highlighted_tile = False
+        self.board.tiles[self.highlighted_i1][self.highlighted_j1].x = self.highlighted_j1 * settings.TILE_SIZE
+        self.board.tiles[self.highlighted_i1][self.highlighted_j1].y = self.highlighted_i1 * settings.TILE_SIZE
+    
+    def __to_virtual_pos(self, input_data: InputData) -> tuple[int, int]:
+        pos_x, pos_y = input_data.position
+        pos_x = pos_x * settings.VIRTUAL_WIDTH // settings.WINDOW_WIDTH - self.board.x
+        pos_y = pos_y * settings.VIRTUAL_HEIGHT // settings.WINDOW_HEIGHT - self.board.y
+        
+        return pos_x, pos_y
+
+    def __to_index(self, x: int, y: int)-> tuple[int, int]:
+        i = y // settings.TILE_SIZE
+        j = x // settings.TILE_SIZE
+
+        return i, j
 
     def __calculate_matches(self, tiles: List) -> None:
         matches = self.board.calculate_matches_for(tiles)
