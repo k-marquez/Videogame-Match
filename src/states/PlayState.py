@@ -7,7 +7,7 @@ alejandro.j.mujic4@gmail.com
 
 This file contains the class PlayState.
 """
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Set
 
 import pygame
 
@@ -17,6 +17,7 @@ from gale.text import render_text
 from gale.timer import Timer
 
 import settings
+from src.Tile import Tile
 
 
 class PlayState(BaseState):
@@ -157,42 +158,43 @@ class PlayState(BaseState):
                         tile2 = self.board.tiles[self.highlighted_i2][
                             self.highlighted_j2
                         ]
-                    
-                        def arrive():
-                            tile1 = self.board.tiles[self.highlighted_i1][
-                                self.highlighted_j1
-                            ]
-                            tile2 = self.board.tiles[self.highlighted_i2][
-                                self.highlighted_j2
-                            ]
-                            (
-                                self.board.tiles[tile1.i][tile1.j],
-                                self.board.tiles[tile2.i][tile2.j],
-                            ) = (
-                                self.board.tiles[tile2.i][tile2.j],
-                                self.board.tiles[tile1.i][tile1.j],
-                            )
-                            tile1.i, tile1.j, tile2.i, tile2.j = (
-                                tile2.i,
-                                tile2.j,
-                                tile1.i,
-                                tile1.j,
-                            )
-                            self.__calculate_matches([tile1, tile2])
-                    
-                        # Swap tiles
-                        Timer.tween(
-                            0.25,
-                            [
-                                (tile1, {"x": tile2.x, "y": tile2.y}),
-                                (tile2, {"x": self.highlighted_j1 * settings.TILE_SIZE,
-                                         "y": self.highlighted_i1 * settings.TILE_SIZE}),
-                            ],
-                            on_finish=arrive,
-                        )
+                        self.__swap_tiles(tile1, tile2)
 
-                    self.__get_back_last_move()
-             
+                        matches = self.__get_matches([tile1, tile2])
+
+                        # Get back highlighted tile
+                        if matches is None:
+                            self.active = True
+                            self.highlighted_tile = False
+                            
+                            self.__swap_tiles(tile2, tile1)
+
+                            Timer.tween(
+                                0.15,
+                                [
+                                    (tile1, {"x": self.highlighted_j1 * settings.TILE_SIZE,
+                                             "y": self.highlighted_i1 * settings.TILE_SIZE,}
+                                    ),
+                                ],
+                            )
+                            return
+                        
+                        # Swap tiles
+                        else:                            
+                            Timer.tween(
+                                0.25,
+                                [
+                                    (tile1, {"x": tile2.x, "y": tile2.y}),
+                                    (tile2, {"x": self.highlighted_j1 * settings.TILE_SIZE,
+                                            "y": self.highlighted_i1 * settings.TILE_SIZE}),
+                                ],
+                                on_finish=lambda: self.__solve_matches(matches),
+                            )
+                            # Unhighlighted tile
+                            self.highlighted_tile = False
+                            # Activate inputs
+                            self.active = True
+        # Draggin tile selected
         elif input_id == "mouse_motion" and self.highlighted_tile:
             pos_x, pos_y = self.__to_virtual_pos(input_data)
             i, j = self.__to_index(pos_x, pos_y)
@@ -201,12 +203,14 @@ class PlayState(BaseState):
                 self.board.tiles[self.highlighted_i1][self.highlighted_j1].y =  pos_y - settings.TILE_SIZE / 2
             
             else:
-                self.__get_back_last_move()
-
-    def __get_back_last_move(self) -> None:
-        self.highlighted_tile = False
-        self.board.tiles[self.highlighted_i1][self.highlighted_j1].x = self.highlighted_j1 * settings.TILE_SIZE
-        self.board.tiles[self.highlighted_i1][self.highlighted_j1].y = self.highlighted_i1 * settings.TILE_SIZE
+                self.highlighted_tile = False
+    
+    def __swap_tiles(self, tile1: Tile, tile2: Tile) -> None:
+        (self.board.tiles[tile1.i][tile1.j], self.board.tiles[tile2.i][tile2.j],) = (
+            self.board.tiles[tile2.i][tile2.j],
+            self.board.tiles[tile1.i][tile1.j],
+        )
+        tile1.i, tile1.j, tile2.i, tile2.j = ( tile2.i, tile2.j, tile1.i, tile1.j,)
     
     def __to_virtual_pos(self, input_data: InputData) -> tuple[int, int]:
         pos_x, pos_y = input_data.position
@@ -221,13 +225,10 @@ class PlayState(BaseState):
 
         return i, j
 
-    def __calculate_matches(self, tiles: List) -> None:
-        matches = self.board.calculate_matches_for(tiles)
-
-        if matches is None:
-            self.active = True
-            return
-
+    def __get_matches(self, tiles: List) -> Set[Tile]:
+        return self.board.calculate_matches_for(tiles)
+    
+    def __solve_matches(self, matches: Set[Tile]) -> None:
         settings.SOUNDS["match"].stop()
         settings.SOUNDS["match"].play()
 
@@ -237,11 +238,14 @@ class PlayState(BaseState):
         self.board.remove_matches()
 
         falling_tiles = self.board.get_falling_tiles()
+        
+        def recal_matches():
+            matches = self.__get_matches([item[0] for item in falling_tiles])
+            if matches is not None:
+                self.__solve_matches(matches)
 
         Timer.tween(
             0.25,
             falling_tiles,
-            on_finish=lambda: self.__calculate_matches(
-                [item[0] for item in falling_tiles]
-            ),
+            on_finish=recal_matches,
         )
