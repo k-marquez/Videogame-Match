@@ -29,8 +29,6 @@ class PlayState(BaseState):
         # Position in the grid which we are highlighting
         self.board_highlight_i1 = -1
         self.board_highlight_j1 = -1
-        self.board_highlight_i2 = -1
-        self.board_highlight_j2 = -1
 
         self.highlighted_tile = False
 
@@ -144,29 +142,31 @@ class PlayState(BaseState):
                     self.highlighted_j1 = j
                
                 elif input_data.released and self.highlighted_tile:
-                    self.highlighted_j2 = j
-                    self.highlighted_i2 = i
+                    di, dj = self.__get_index_delta(i, j, self.highlighted_i1, self.highlighted_j1)
+                    tile1 = self.board.tiles[self.highlighted_i1][self.highlighted_j1]
                     
-                    di = abs(self.highlighted_i2 - self.highlighted_i1)
-                    dj = abs(self.highlighted_j2 - self.highlighted_j1)
-                    
-                    if di <= 1 and dj <= 1 and di != dj:
+                    # Valid movement
+                    if di != dj:
                         self.active = False
-                        tile1 = self.board.tiles[self.highlighted_i1][
-                            self.highlighted_j1
-                        ]
-                        tile2 = self.board.tiles[self.highlighted_i2][
-                            self.highlighted_j2
-                        ]
+                        tile2 = self.board.tiles[i][j]
+
                         self.__swap_tiles(tile1, tile2)
 
                         matches = self.__get_matches([tile1, tile2])
 
-                        # Get back highlighted tile
-                        if matches is None:
-                            self.active = True
-                            self.highlighted_tile = False
-                            
+                        # Swap tiles
+                        if matches is not None:                            
+                            Timer.tween(
+                                0.25,
+                                [
+                                    (tile1, {"x": tile2.x, "y": tile2.y}),
+                                    (tile2, {"x": self.highlighted_j1 * settings.TILE_SIZE,
+                                            "y": self.highlighted_i1 * settings.TILE_SIZE}),
+                                ],
+                                on_finish=lambda: self.__solve_matches(matches),
+                            )
+                        # Get back highlighted tile (No match)
+                        else:
                             self.__swap_tiles(tile2, tile1)
 
                             Timer.tween(
@@ -177,33 +177,51 @@ class PlayState(BaseState):
                                     ),
                                 ],
                             )
-                            return
-                        
-                        # Swap tiles
-                        else:                            
-                            Timer.tween(
-                                0.25,
+                    # Invalid movement
+                    else:
+                       Timer.tween(
+                                0.15,
                                 [
-                                    (tile1, {"x": tile2.x, "y": tile2.y}),
-                                    (tile2, {"x": self.highlighted_j1 * settings.TILE_SIZE,
-                                            "y": self.highlighted_i1 * settings.TILE_SIZE}),
+                                    (tile1, {"x": self.highlighted_j1 * settings.TILE_SIZE,
+                                             "y": self.highlighted_i1 * settings.TILE_SIZE,}
+                                    ),
                                 ],
-                                on_finish=lambda: self.__solve_matches(matches),
-                            )
-                            # Unhighlighted tile
-                            self.highlighted_tile = False
-                            # Activate inputs
-                            self.active = True
+                            ) 
+                    # Reset on input for acepting entries
+                    self.__reset_input()                         
+                
+
         # Draggin tile selected
         elif input_id == "mouse_motion" and self.highlighted_tile:
             pos_x, pos_y = self.__to_virtual_pos(input_data)
             i, j = self.__to_index(pos_x, pos_y)
-            if abs(i - self.highlighted_i1) < 2 and abs(j - self.highlighted_j1) < 2:
+            di , dj = self.__get_index_delta(i,j, self.highlighted_i1, self.highlighted_j1) 
+            
+            # Valid movement
+            if  (di != dj) or (di == 0 and dj == 0):
                 self.board.tiles[self.highlighted_i1][self.highlighted_j1].x = pos_x - settings.TILE_SIZE / 2
                 self.board.tiles[self.highlighted_i1][self.highlighted_j1].y =  pos_y - settings.TILE_SIZE / 2
             
+            # Invalid movement
             else:
-                self.highlighted_tile = False
+                self.__reset_input()
+                tile1 = self.board.tiles[self.highlighted_i1][self.highlighted_j1]
+                Timer.tween(
+                    0.15,
+                    [
+                        (tile1, {"x": self.highlighted_j1 * settings.TILE_SIZE,
+                                 "y": self.highlighted_i1 * settings.TILE_SIZE,}
+                        ),
+                    ],
+                )
+    def __get_index_delta(self, i1: int, j1: int, i2:int, j2:int) -> tuple[int, int]:
+        di = abs(i1 - i2)
+        dj = abs(j1 - j2)
+        return di, dj
+    
+    def __reset_input(self) -> None:
+        self.active = True
+        self.highlighted_tile = False
     
     def __swap_tiles(self, tile1: Tile, tile2: Tile) -> None:
         (self.board.tiles[tile1.i][tile1.j], self.board.tiles[tile2.i][tile2.j],) = (
