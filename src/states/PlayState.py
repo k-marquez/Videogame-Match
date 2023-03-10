@@ -18,7 +18,7 @@ from gale.timer import Timer
 
 import settings
 from src.Tile import Tile
-
+from src.Board import Board
 
 class PlayState(BaseState):
     def enter(self, **enter_params: Dict[str, Any]) -> None:
@@ -29,12 +29,14 @@ class PlayState(BaseState):
         # Position in the grid which we are highlighting
         self.board_highlight_i1 = -1
         self.board_highlight_j1 = -1
+        self.board_highlight = [] #Borrar
 
         self.highlighted_tile = False
 
         self.active = True
 
         self.timer = settings.LEVEL_TIME
+        self.hint_timer = settings.HINT_TIME
 
         self.goal_score = self.level * 1.25 * 1000
 
@@ -49,11 +51,27 @@ class PlayState(BaseState):
             border_radius=7,
         )
 
+        # A surface that supports alpha to hits tiles
+        self.hint_alpha_surface = pygame.Surface(
+            (settings.TILE_SIZE, settings.TILE_SIZE), pygame.SRCALPHA
+        )
+        pygame.draw.rect(
+            self.hint_alpha_surface,
+            (212, 245, 66, 85),
+            pygame.Rect(0, 0, settings.TILE_SIZE, settings.TILE_SIZE),
+            border_radius=7,
+        )
+
         # A surface that supports alpha to draw behind the text.
         self.text_alpha_surface = pygame.Surface((212, 136), pygame.SRCALPHA)
         pygame.draw.rect(
             self.text_alpha_surface, (56, 56, 56, 234), pygame.Rect(0, 0, 212, 136)
         )
+
+        while not self.can_play():
+            print("No hay jugadas, reinciando tablero")
+            delattr(self, "board")
+            self.board = Board(settings.VIRTUAL_WIDTH - 272, 16)
 
         def decrement_timer():
             self.timer -= 1
@@ -62,7 +80,19 @@ class PlayState(BaseState):
             if self.timer <= 5:
                 settings.SOUNDS["clock"].play()
 
+            if not self.can_play():
+                delattr(self, "board")
+                self.board = Board(settings.VIRTUAL_WIDTH - 272, 16)
+        
         Timer.every(1, decrement_timer)
+        
+        def increment_hint_timer():
+            self.hint_timer += 1
+
+            if self.hint_timer >= 15:
+                self.hint_timer = 0
+
+        Timer.every(1, increment_hint_timer)
 
         InputHandler.register_listener(self)
 
@@ -88,6 +118,12 @@ class PlayState(BaseState):
             y = self.highlighted_i1 * settings.TILE_SIZE + self.board.y
             surface.blit(self.tile_alpha_surface, (x, y))
 
+        if self.hint_timer >= 10:
+            for p in self.board_highlight:
+                x = p["j"] * settings.TILE_SIZE + self.board.x
+                y = p["i"] * settings.TILE_SIZE + self.board.y
+                surface.blit(self.hint_alpha_surface, (x, y))
+        
         surface.blit(self.text_alpha_surface, (16, 16))
         render_text(
             surface,
@@ -155,7 +191,7 @@ class PlayState(BaseState):
                         matches = self.__get_matches([tile1, tile2])
 
                         # Swap tiles
-                        if matches is not None:                            
+                        if matches is not None:
                             Timer.tween(
                                 0.25,
                                 [
@@ -190,7 +226,6 @@ class PlayState(BaseState):
                     # Reset on input for acepting entries
                     self.__reset_input()                         
                 
-
         # Draggin tile selected
         elif input_id == "mouse_motion" and self.highlighted_tile:
             pos_x, pos_y = self.__to_virtual_pos(input_data)
@@ -214,6 +249,7 @@ class PlayState(BaseState):
                         ),
                     ],
                 )
+    
     def __get_index_delta(self, i1: int, j1: int, i2:int, j2:int) -> tuple[int, int]:
         di = abs(i1 - i2)
         dj = abs(j1 - j2)
@@ -267,3 +303,31 @@ class PlayState(BaseState):
             falling_tiles,
             on_finish=recal_matches,
         )
+
+    def can_play(self) -> bool:
+        self.board_highlight = []
+        for j in range(settings.BOARD_WIDTH - 1):
+            for i in range(settings.BOARD_HEIGHT - 1):
+                if self.are_there_movements(i,j,1,0):
+                    return True
+                else:
+                    if self.are_there_movements(i,j,0,1):
+                        return True
+                
+        return False
+    
+    def are_there_movements(self, i: int, j: int, left: int, down: int) -> bool:
+        tile1 = self.board.tiles[i][j]
+        tile2 = self.board.tiles[i + down][j + left]
+        self.__swap_tiles(tile1, tile2)
+        posible_matches = self.__get_matches([tile1, tile2])
+        if posible_matches is not None:
+            for row in posible_matches:
+                for tile in row:
+                    self.board_highlight.append({"i": tile.i, "j": tile.j})
+            
+            self.__swap_tiles(tile1, tile2)
+            return True
+        
+        self.__swap_tiles(tile1, tile2)
+        return False
