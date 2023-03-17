@@ -69,7 +69,6 @@ class PlayState(BaseState):
         )
 
         while not self.can_play():
-            print("No hay jugadas, reinciando tablero")
             delattr(self, "board")
             self.board = Board(settings.VIRTUAL_WIDTH - 272, 16)
 
@@ -79,10 +78,13 @@ class PlayState(BaseState):
             # Play warning sound on timer if we get low
             if self.timer <= 5:
                 settings.SOUNDS["clock"].play()
-
+            # Check if exits almost one move
             if not self.can_play():
                 delattr(self, "board")
+                # New board if not exits movements
                 self.board = Board(settings.VIRTUAL_WIDTH - 272, 16)
+                # Reboot hint timer
+                self.hint_timer = 0
         
         Timer.every(1, decrement_timer)
         
@@ -308,15 +310,15 @@ class PlayState(BaseState):
         self.board_highlight = []
         for j in range(settings.BOARD_WIDTH - 1):
             for i in range(settings.BOARD_HEIGHT - 1):
-                if self.are_there_movements(i,j,1,0):
+                if self.is_there_movement(i,j):
                     return True
-                else:
-                    if self.are_there_movements(i,j,0,1):
-                        return True
                 
         return False
     
-    def are_there_movements(self, i: int, j: int, left: int, down: int) -> bool:
+    def is_there_movement(self, i: int, j: int) -> bool:
+        return self.__is_there_movement(i,j,1,0) or self.__is_there_movement(i,j,0,1)
+    
+    def __is_there_movement(self, i: int, j: int, left: int, down: int) -> bool:
         tile1 = self.board.tiles[i][j]
         tile2 = self.board.tiles[i + down][j + left]
         self.__swap_tiles(tile1, tile2)
