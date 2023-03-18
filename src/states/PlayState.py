@@ -37,6 +37,7 @@ class PlayState(BaseState):
 
         self.timer = settings.LEVEL_TIME
         self.hint_timer = settings.HINT_TIME
+        self.hint_tiles = []
 
         self.goal_score = self.level * 1.25 * 1000
 
@@ -117,10 +118,11 @@ class PlayState(BaseState):
             y = self.highlighted_i1 * settings.TILE_SIZE + self.board.y
             surface.blit(self.tile_alpha_surface, (x, y))
 
-        for pos_tile in self.hint_tiles:
-            x = pos_tile['x'] + self.board.x
-            y = pos_tile['y'] + self.board.y
-            surface.blit(self.hint_alpha_surface, (x, y))
+        if self.hint_timer > 10:
+            for pos_tile in self.hint_tiles:
+                x = pos_tile['x'] + self.board.x
+                y = pos_tile['y'] + self.board.y
+                surface.blit(self.hint_alpha_surface, (x, y))
         
         surface.blit(self.text_alpha_surface, (16, 16))
         render_text(
@@ -191,6 +193,7 @@ class PlayState(BaseState):
                         # Swap tiles
                         if matches is not None:
                             self.hint_tiles = []
+                            self.hint_timer = 0
                             Timer.tween(
                                 0.25,
                                 [
@@ -304,6 +307,9 @@ class PlayState(BaseState):
         )
 
     def can_play(self) -> bool:
+        if len(self.hint_tiles) > 0:
+            return True
+        
         for j in range(settings.BOARD_WIDTH - 1):
             for i in range(settings.BOARD_HEIGHT - 1):
                 if self.is_there_movement(i,j):
