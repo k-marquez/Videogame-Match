@@ -306,10 +306,8 @@ class PlayState(BaseState):
     def can_play(self) -> bool:
         for j in range(settings.BOARD_WIDTH - 1):
             for i in range(settings.BOARD_HEIGHT - 1):
-                if self.are_there_movements(i,j,1,0) or self.are_there_movements(i,j,0,1):
-                    self.active = True
+                if self.is_there_movement(i,j):
                     return True
-        
 
         return False
     
