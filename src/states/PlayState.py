@@ -7,7 +7,7 @@ alejandro.j.mujic4@gmail.com
 
 This file contains the class PlayState.
 """
-from typing import Dict, Any, List, Set, NoReturn
+from typing import Dict, Any, List, Set, NoReturn, Tuple
 from copy import deepcopy
 
 import pygame
@@ -252,7 +252,7 @@ class PlayState(BaseState):
                     ],
                 )
     
-    def __get_index_delta(self, i1: int, j1: int, i2:int, j2:int) -> tuple[int, int]:
+    def __get_index_delta(self, i1: int, j1: int, i2:int, j2:int) -> Tuple[int, int]:
         di = abs(i1 - i2)
         dj = abs(j1 - j2)
         return di, dj
