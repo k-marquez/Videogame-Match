@@ -235,7 +235,7 @@ class PlayState(BaseState):
             di , dj = self.__get_index_delta(i,j, self.highlighted_i1, self.highlighted_j1) 
             
             # Valid movement
-            if  (di != dj) or (di == 0 and dj == 0):
+            if (di < 2 and dj == 0) or (dj < 2 and di == 0):
                 self.board.tiles[self.highlighted_i1][self.highlighted_j1].x = pos_x - settings.TILE_SIZE / 2
                 self.board.tiles[self.highlighted_i1][self.highlighted_j1].y =  pos_y - settings.TILE_SIZE / 2
             
