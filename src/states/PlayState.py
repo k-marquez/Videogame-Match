@@ -7,7 +7,8 @@ alejandro.j.mujic4@gmail.com
 
 This file contains the class PlayState.
 """
-from typing import Dict, Any, List, Set
+from typing import Dict, Any, List, Set, NoReturn
+from copy import deepcopy
 
 import pygame
 
@@ -21,7 +22,7 @@ from src.Tile import Tile
 from src.Board import Board
 
 class PlayState(BaseState):
-    def enter(self, **enter_params: Dict[str, Any]) -> None:
+    def enter(self, **enter_params: Dict[str, Any]) -> NoReturn:
         self.level = enter_params["level"]
         self.board = enter_params["board"]
         self.score = enter_params["score"]
@@ -29,7 +30,6 @@ class PlayState(BaseState):
         # Position in the grid which we are highlighting
         self.board_highlight_i1 = -1
         self.board_highlight_j1 = -1
-        self.board_highlight = [] #Borrar
 
         self.highlighted_tile = False
 
@@ -57,7 +57,7 @@ class PlayState(BaseState):
         )
         pygame.draw.rect(
             self.hint_alpha_surface,
-            (212, 245, 66, 85),
+            (0, 0, 0, 75),
             pygame.Rect(0, 0, settings.TILE_SIZE, settings.TILE_SIZE),
             border_radius=7,
         )
@@ -69,7 +69,6 @@ class PlayState(BaseState):
         )
 
         while not self.can_play():
-            print("No hay jugadas, reinciando tablero")
             delattr(self, "board")
             self.board = Board(settings.VIRTUAL_WIDTH - 272, 16)
 
@@ -80,7 +79,7 @@ class PlayState(BaseState):
             if self.timer <= 5:
                 settings.SOUNDS["clock"].play()
 
-            if not self.can_play():
+            while not self.can_play():
                 delattr(self, "board")
                 self.board = Board(settings.VIRTUAL_WIDTH - 272, 16)
         
@@ -89,17 +88,14 @@ class PlayState(BaseState):
         def increment_hint_timer():
             self.hint_timer += 1
 
-            if self.hint_timer >= 15:
-                self.hint_timer = 0
-
         Timer.every(1, increment_hint_timer)
 
         InputHandler.register_listener(self)
 
-    def exit(self) -> None:
+    def exit(self) -> NoReturn:
         InputHandler.unregister_listener(self)
 
-    def update(self, _: float) -> None:
+    def update(self, _: float) -> NoReturn:
         if self.timer <= 0:
             Timer.clear()
             settings.SOUNDS["game-over"].play()
@@ -110,7 +106,7 @@ class PlayState(BaseState):
             settings.SOUNDS["next-level"].play()
             self.state_machine.change("begin", level=self.level + 1, score=self.score)
 
-    def render(self, surface: pygame.Surface) -> None:
+    def render(self, surface: pygame.Surface) -> NoReturn:
         self.board.render(surface)
 
         if self.highlighted_tile:
@@ -118,11 +114,10 @@ class PlayState(BaseState):
             y = self.highlighted_i1 * settings.TILE_SIZE + self.board.y
             surface.blit(self.tile_alpha_surface, (x, y))
 
-        if self.hint_timer >= 10:
-            for p in self.board_highlight:
-                x = p["j"] * settings.TILE_SIZE + self.board.x
-                y = p["i"] * settings.TILE_SIZE + self.board.y
-                surface.blit(self.hint_alpha_surface, (x, y))
+        for pos_tile in self.hint_tiles:
+            x = pos_tile['x'] + self.board.x
+            y = pos_tile['y'] + self.board.y
+            surface.blit(self.hint_alpha_surface, (x, y))
         
         surface.blit(self.text_alpha_surface, (16, 16))
         render_text(
@@ -162,7 +157,7 @@ class PlayState(BaseState):
             shadowed=True,
         )
 
-    def on_input(self, input_id: str, input_data: InputData) -> None:
+    def on_input(self, input_id: str, input_data: InputData) -> NoReturn:
         if not self.active:
             return
         
@@ -192,6 +187,7 @@ class PlayState(BaseState):
 
                         # Swap tiles
                         if matches is not None:
+                            self.hint_tiles = []
                             Timer.tween(
                                 0.25,
                                 [
@@ -255,11 +251,11 @@ class PlayState(BaseState):
         dj = abs(j1 - j2)
         return di, dj
     
-    def __reset_input(self) -> None:
+    def __reset_input(self) -> NoReturn:
         self.active = True
         self.highlighted_tile = False
     
-    def __swap_tiles(self, tile1: Tile, tile2: Tile) -> None:
+    def __swap_tiles(self, tile1: Tile, tile2: Tile) -> NoReturn:
         (self.board.tiles[tile1.i][tile1.j], self.board.tiles[tile2.i][tile2.j],) = (
             self.board.tiles[tile2.i][tile2.j],
             self.board.tiles[tile1.i][tile1.j],
@@ -282,7 +278,7 @@ class PlayState(BaseState):
     def __get_matches(self, tiles: List) -> Set[Tile]:
         return self.board.calculate_matches_for(tiles)
     
-    def __solve_matches(self, matches: Set[Tile]) -> None:
+    def __solve_matches(self, matches: Set[Tile]) -> NoReturn:
         settings.SOUNDS["match"].stop()
         settings.SOUNDS["match"].play()
 
@@ -305,29 +301,24 @@ class PlayState(BaseState):
         )
 
     def can_play(self) -> bool:
-        self.board_highlight = []
         for j in range(settings.BOARD_WIDTH - 1):
             for i in range(settings.BOARD_HEIGHT - 1):
-                if self.are_there_movements(i,j,1,0):
+                if self.are_there_movements(i,j,1,0) or self.are_there_movements(i,j,0,1):
+                    self.active = True
                     return True
-                else:
-                    if self.are_there_movements(i,j,0,1):
-                        return True
-                
+        
         return False
     
     def are_there_movements(self, i: int, j: int, left: int, down: int) -> bool:
         tile1 = self.board.tiles[i][j]
         tile2 = self.board.tiles[i + down][j + left]
         self.__swap_tiles(tile1, tile2)
-        posible_matches = self.__get_matches([tile1, tile2])
-        if posible_matches is not None:
-            for row in posible_matches:
-                for tile in row:
-                    self.board_highlight.append({"i": tile.i, "j": tile.j})
-            
-            self.__swap_tiles(tile1, tile2)
+        matches = self.__get_matches([tile1, tile2])
+        self.__swap_tiles(tile1, tile2)
+        if matches is not None: 
+            self.hint_tiles = [{"x": tiles.x, "y": tiles.y} for row in matches for tiles in row]
+            self.hint_tiles = deepcopy(self.hint_tiles)
+            self.board.matches = []
             return True
         
-        self.__swap_tiles(tile1, tile2)
         return False
