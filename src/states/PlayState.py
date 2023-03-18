@@ -268,14 +268,14 @@ class PlayState(BaseState):
         )
         tile1.i, tile1.j, tile2.i, tile2.j = ( tile2.i, tile2.j, tile1.i, tile1.j,)
     
-    def __to_virtual_pos(self, input_data: InputData) -> tuple[int, int]:
+    def __to_virtual_pos(self, input_data: InputData) -> Tuple[int, int]:
         pos_x, pos_y = input_data.position
         pos_x = pos_x * settings.VIRTUAL_WIDTH // settings.WINDOW_WIDTH - self.board.x
         pos_y = pos_y * settings.VIRTUAL_HEIGHT // settings.WINDOW_HEIGHT - self.board.y
         
         return pos_x, pos_y
 
-    def __to_index(self, x: int, y: int)-> tuple[int, int]:
+    def __to_index(self, x: int, y: int)-> Tuple[int, int]:
         i = y // settings.TILE_SIZE
         j = x // settings.TILE_SIZE
 
