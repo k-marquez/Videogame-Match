@@ -85,13 +85,6 @@ class PlayState(BaseState):
             # Play warning sound on timer if we get low
             if self.timer <= 5:
                 settings.SOUNDS["clock"].play()
-            # Check if exits almost one move
-            while not self.can_play():
-                delattr(self, "board")
-                # New board if not exits movements
-                self.board = Board(settings.VIRTUAL_WIDTH - 272, 16)
-                # Reboot hint timer
-                self.hint_timer = 0
         
         Timer.every(1, decrement_timer)
         
@@ -294,6 +287,14 @@ class PlayState(BaseState):
             matches = self.__get_matches([item[0] for item in falling_tiles])
             if matches is not None:
                 self.__solve_matches(matches)
+            
+             # Check if exits almost one move
+            while not self.can_play():
+                delattr(self, "board")
+                # New board if not exits movements
+                self.board = Board(settings.VIRTUAL_WIDTH - 272, 16)
+                # Reboot hint timer
+                self.hint_timer = 0
 
         Timer.tween(
             0.25,
