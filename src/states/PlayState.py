@@ -18,6 +18,7 @@ from copy import deepcopy
 
 import pygame
 
+from gale.factory import AbstractFactory
 from gale.input_handler import InputHandler, InputData
 from gale.state_machine import BaseState
 from gale.text import render_text
@@ -26,6 +27,7 @@ from gale.timer import Timer
 import settings
 from src.Tile import Tile
 from src.Board import Board
+import src.powerups
 
 class PlayState(BaseState):
     def enter(self, **enter_params: Dict[str, Any]) -> NoReturn:
@@ -46,6 +48,9 @@ class PlayState(BaseState):
         self.hint_tiles = []
 
         self.goal_score = self.level * 1.25 * 1000
+
+        self.generator_of_factorys = AbstractFactory("src.powerups")
+        self.tiles_in_match = []
 
         # A surface that supports alpha to highlight a selected tile
         self.tile_alpha_surface = pygame.Surface(
@@ -189,6 +194,11 @@ class PlayState(BaseState):
                     tile2 = self.board.tiles[i][j]
                     self.__swap_tiles(tile1, tile2)
                     matches = self.__get_matches([tile1, tile2])
+                    
+                    def before_matched():
+                        self.tiles_in_match.append(tile1, tile2)
+                        self.__solve_matches(matches)
+                    
                     # Swap tiles
                     if matches is not None:
                         self.hint_tiles = []
@@ -200,7 +210,7 @@ class PlayState(BaseState):
                                 (tile2, {"x": self.highlighted_j1 * settings.TILE_SIZE,
                                         "y": self.highlighted_i1 * settings.TILE_SIZE}),
                             ],
-                            on_finish=lambda: self.__solve_matches(matches),
+                            on_finish=before_matched,
                         )
                     # Get back highlighted tile (No match)
                     else:
@@ -276,9 +286,20 @@ class PlayState(BaseState):
         settings.SOUNDS["match"].stop()
         settings.SOUNDS["match"].play()
 
-        for match in matches:
-            self.score += len(match) * 50
+        powerups_to_create = {}
 
+        for match in matches:
+            size_m = len(match)
+            self.score += size_m * 50
+            # if size_m == 4:
+            #     for tile in match:
+            #         if tile == self.tiles_in_match[0]:
+            #             powerups_to_create['BlowCross.cpython']
+            #             break
+
+        # self.powerups_abstract_factory.get_factory("TwoMoreBall").create(
+        #                     r.centerx - 8, r.centery - 8
+        #                 )
         self.board.remove_matches()
 
         falling_tiles = self.board.get_falling_tiles()
