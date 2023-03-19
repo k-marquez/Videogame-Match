@@ -32,7 +32,7 @@ input_handler.InputHandler.set_mouse_motion_action(input_handler.MOUSE_MOTION_RI
 input_handler.InputHandler.set_mouse_motion_action(input_handler.MOUSE_MOTION_DOWN, "mouse_motion")
 
 WINDOW_WIDTH = 1024
-WINDOW_HEIGHT = 600
+WINDOW_HEIGHT = 570
 
 VIRTUAL_WIDTH = 512
 VIRTUAL_HEIGHT = 288
@@ -48,7 +48,7 @@ NUM_COLORS = 18
 BACKGROUND_SCROLL_SPEED = 40
 BACKGROUND_LOOPING_POINT = -1024 + VIRTUAL_WIDTH - 4 + 51
 
-LEVEL_TIME = 60
+LEVEL_TIME = 600
 HINT_TIME = 5
 
 BASE_DIR = Path(__file__).parent
