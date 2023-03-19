@@ -5,6 +5,12 @@ Study Case: Match-3
 Author: Alejandro Mujica
 alejandro.j.mujic4@gmail.com
 
+Author: Kevin Márquez
+marquezberriosk@gmail.com
+
+Author: Lewis Ochoa
+lewis8a@gmail.com
+
 This file contains the class PlayState.
 """
 from typing import Dict, Any, List, Set, NoReturn, Tuple
@@ -58,7 +64,7 @@ class PlayState(BaseState):
         )
         pygame.draw.rect(
             self.hint_alpha_surface,
-            (0, 0, 0, 75),
+            (0, 0, 0, 150),
             pygame.Rect(0, 0, settings.TILE_SIZE, settings.TILE_SIZE),
             border_radius=7,
         )
@@ -122,7 +128,11 @@ class PlayState(BaseState):
             for pos_tile in self.hint_tiles:
                 x = pos_tile['x'] + self.board.x
                 y = pos_tile['y'] + self.board.y
-                surface.blit(self.hint_alpha_surface, (x, y))
+                if self.timer % 2 == 0:
+                    surface.blit(self.hint_alpha_surface, (x, y))
+                else:
+                    surface.blit(self.tile_alpha_surface, (x, y))
+
         
         surface.blit(self.text_alpha_surface, (16, 16))
         render_text(
