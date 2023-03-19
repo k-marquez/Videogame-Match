@@ -178,53 +178,38 @@ class PlayState(BaseState):
                     self.highlighted_j1 = j
                
                 elif input_data.released and self.highlighted_tile:
-                    di, dj = self.__get_index_delta(i, j, self.highlighted_i1, self.highlighted_j1)
+                    #di, dj = self.__get_index_delta(i, j, self.highlighted_i1, self.highlighted_j1)
                     tile1 = self.board.tiles[self.highlighted_i1][self.highlighted_j1]
                     
                     # Valid movement
-                    if di != dj:
-                        self.active = False
-                        tile2 = self.board.tiles[i][j]
-
-                        self.__swap_tiles(tile1, tile2)
-
-                        matches = self.__get_matches([tile1, tile2])
-
-                        # Swap tiles
-                        if matches is not None:
-                            self.hint_tiles = []
-                            self.hint_timer = 0
-                            Timer.tween(
-                                0.25,
-                                [
-                                    (tile1, {"x": tile2.x, "y": tile2.y}),
-                                    (tile2, {"x": self.highlighted_j1 * settings.TILE_SIZE,
-                                            "y": self.highlighted_i1 * settings.TILE_SIZE}),
-                                ],
-                                on_finish=lambda: self.__solve_matches(matches),
-                            )
-                        # Get back highlighted tile (No match)
-                        else:
-                            self.__swap_tiles(tile2, tile1)
-
-                            Timer.tween(
-                                0.15,
-                                [
-                                    (tile1, {"x": self.highlighted_j1 * settings.TILE_SIZE,
-                                             "y": self.highlighted_i1 * settings.TILE_SIZE,}
-                                    ),
-                                ],
-                            )
-                    # Invalid movement
+                    self.active = False
+                    tile2 = self.board.tiles[i][j]
+                    self.__swap_tiles(tile1, tile2)
+                    matches = self.__get_matches([tile1, tile2])
+                    # Swap tiles
+                    if matches is not None:
+                        self.hint_tiles = []
+                        self.hint_timer = 0
+                        Timer.tween(
+                            0.25,
+                            [
+                                (tile1, {"x": tile2.x, "y": tile2.y}),
+                                (tile2, {"x": self.highlighted_j1 * settings.TILE_SIZE,
+                                        "y": self.highlighted_i1 * settings.TILE_SIZE}),
+                            ],
+                            on_finish=lambda: self.__solve_matches(matches),
+                        )
+                    # Get back highlighted tile (No match)
                     else:
-                       Timer.tween(
-                                0.15,
-                                [
-                                    (tile1, {"x": self.highlighted_j1 * settings.TILE_SIZE,
-                                             "y": self.highlighted_i1 * settings.TILE_SIZE,}
-                                    ),
-                                ],
-                            ) 
+                        self.__swap_tiles(tile2, tile1)
+                        Timer.tween(
+                            0.15,
+                            [
+                                (tile1, {"x": self.highlighted_j1 * settings.TILE_SIZE,
+                                         "y": self.highlighted_i1 * settings.TILE_SIZE,}
+                                ),
+                            ],
+                        )
                     # Reset on input for acepting entries
                     self.__reset_input()                         
                 
@@ -238,7 +223,7 @@ class PlayState(BaseState):
             if (di < 2 and dj == 0) or (dj < 2 and di == 0):
                 self.board.tiles[self.highlighted_i1][self.highlighted_j1].x = pos_x - settings.TILE_SIZE / 2
                 self.board.tiles[self.highlighted_i1][self.highlighted_j1].y =  pos_y - settings.TILE_SIZE / 2
-            
+
             # Invalid movement
             else:
                 self.__reset_input()
