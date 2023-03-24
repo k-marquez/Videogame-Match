@@ -5,6 +5,12 @@ Study Case: Match-3
 Author: Alejandro Mujica
 alejandro.j.mujic4@gmail.com
 
+Author: Kevin Márquez
+marquezberriosk@gmail.com
+
+Author: Lewis Ochoa
+lewis8a@gmail.com
+
 This file contains the class Board.
 """
 from typing import List, Optional, Tuple, Any, Dict, Set
@@ -151,8 +157,24 @@ class Board:
     def remove_matches(self) -> None:
         for match in self.matches:
             for tile in match:
-                self.tiles[tile.i][tile.j] = None
-
+                if tile.powerup == True and tile.active == True:
+                    if tile.type == 1:
+                        for i in range(settings.BOARD_HEIGHT):
+                            if self.tiles[tile.i][tile.j] != self.tiles[i][tile.j]  and self.tiles[i][tile.j] != None:
+                                self.tiles[i][tile.j] = None
+                        for j in range(settings.BOARD_WIDTH):
+                            if self.tiles[tile.i][tile.j] != self.tiles[tile.i][j]  and self.tiles[tile.i][j] != None:
+                                self.tiles[tile.i][j] = None
+                    if tile.type == 2:
+                        for i in range(settings.BOARD_HEIGHT):
+                            for j in range(settings.BOARD_WIDTH):
+                                if self.tiles[tile.i][tile.j] != self.tiles[i][j] and self.tiles[i][j] != None:
+                                    if self.tiles[tile.i][tile.j].color == self.tiles[i][j].color:
+                                        self.tiles[i][j] = None
+                    self.tiles[tile.i][tile.j] = None
+                    break
+                if tile.powerup == False:
+                    self.tiles[tile.i][tile.j] = None
         self.matches = []
 
     def get_falling_tiles(self) -> Tuple[Any, Dict[str, Any]]:

@@ -5,6 +5,12 @@ Study Case: Match-3
 Author: Alejandro Mujica
 alejandro.j.mujic4@gmail.com
 
+Author: Kevin Márquez
+marquezberriosk@gmail.com
+
+Author: Lewis Ochoa
+lewis8a@gmail.com
+
 This file contains the class Tile.
 """
 import pygame
@@ -23,6 +29,9 @@ class Tile:
         self.alpha_surface = pygame.Surface(
             (settings.TILE_SIZE, settings.TILE_SIZE), pygame.SRCALPHA
         )
+        self.powerup = False
+        self.active = False
+        self.type = 0
 
     def render(self, surface: pygame.Surface, offset_x: int, offset_y: int) -> None:
         self.alpha_surface.blit(

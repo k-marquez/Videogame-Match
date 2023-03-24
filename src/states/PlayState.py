@@ -18,7 +18,6 @@ from copy import deepcopy
 
 import pygame
 
-from gale.factory import AbstractFactory
 from gale.input_handler import InputHandler, InputData
 from gale.state_machine import BaseState
 from gale.text import render_text
@@ -27,7 +26,6 @@ from gale.timer import Timer
 import settings
 from src.Tile import Tile
 from src.Board import Board
-import src.powerups
 
 class PlayState(BaseState):
     def enter(self, **enter_params: Dict[str, Any]) -> NoReturn:
@@ -49,7 +47,6 @@ class PlayState(BaseState):
 
         self.goal_score = self.level * 1.25 * 1000
 
-        self.generator_of_factorys = AbstractFactory("src.powerups")
         self.tiles_in_match = []
 
         # A surface that supports alpha to highlight a selected tile
@@ -186,7 +183,7 @@ class PlayState(BaseState):
                     self.highlighted_j1 = j
                
                 elif input_data.released and self.highlighted_tile:
-                    #di, dj = self.__get_index_delta(i, j, self.highlighted_i1, self.highlighted_j1)
+                    ###di, dj = self.__get_index_delta(i, j, self.highlighted_i1, self.highlighted_j1)
                     tile1 = self.board.tiles[self.highlighted_i1][self.highlighted_j1]
                     
                     # Valid movement
@@ -196,7 +193,9 @@ class PlayState(BaseState):
                     matches = self.__get_matches([tile1, tile2])
                     
                     def before_matched():
-                        self.tiles_in_match.append(tile1, tile2)
+                        self.tiles_in_match = []
+                        self.tiles_in_match.append(tile1)
+                        self.tiles_in_match.append(tile2)
                         self.__solve_matches(matches)
                     
                     # Swap tiles
@@ -249,6 +248,13 @@ class PlayState(BaseState):
                         ),
                     ],
                 )
+        if input_id == "click2":
+            pos_x, pos_y = self.__to_virtual_pos(input_data)
+            i, j = self.__to_index(pos_x, pos_y)
+            if 0 <= i < settings.BOARD_HEIGHT and 0 <= j <= settings.BOARD_WIDTH and input_data.released:
+                if self.board.tiles[i][j].powerup == True:
+                    self.board.tiles[i][j].active = True
+                    self.board.remove_matches()
     
     def __get_index_delta(self, i1: int, j1: int, i2:int, j2:int) -> Tuple[int, int]:
         di = abs(i1 - i2)
@@ -286,22 +292,33 @@ class PlayState(BaseState):
         settings.SOUNDS["match"].stop()
         settings.SOUNDS["match"].play()
 
-        powerups_to_create = {}
-
         for match in matches:
             size_m = len(match)
             self.score += size_m * 50
-            # if size_m == 4:
-            #     for tile in match:
-            #         if tile == self.tiles_in_match[0]:
-            #             powerups_to_create['BlowCross.cpython']
-            #             break
+            for tile in match:
+                if tile.powerup:
+                    tile.active = True
+            if size_m == 4:
+                if tile == self.tiles_in_match[0]:
+                    self.tiles_in_match[0].powerup = True
+                    self.tiles_in_match[0].variety = self.tiles_in_match[0].variety + 5
+                    self.tiles_in_match[0].type = 1
 
-        # self.powerups_abstract_factory.get_factory("TwoMoreBall").create(
-        #                     r.centerx - 8, r.centery - 8
-        #                 )
+                if tile == self.tiles_in_match[1]:
+                    self.tiles_in_match[1].powerup = True
+                    self.tiles_in_match[1].variety = self.tiles_in_match[1].variety + 5
+                    self.tiles_in_match[1].type = 1
+            if size_m >= 5:
+                if tile == self.tiles_in_match[0]:
+                    self.tiles_in_match[0].powerup = True
+                    self.tiles_in_match[0].variety = self.tiles_in_match[0].variety + 1
+                    self.tiles_in_match[0].type = 2
+
+                if tile == self.tiles_in_match[1]:
+                    self.tiles_in_match[1].powerup = True
+                    self.tiles_in_match[1].variety = self.tiles_in_match[1].variety + 1
+                    self.tiles_in_match[1].type = 2
         self.board.remove_matches()
-
         falling_tiles = self.board.get_falling_tiles()
         
         def recal_matches():
@@ -309,7 +326,7 @@ class PlayState(BaseState):
             if matches is not None:
                 self.__solve_matches(matches)
             
-             # Check if exits almost one move
+            # Check if exits almost one move
             while not self.can_play():
                 delattr(self, "board")
                 # New board if not exits movements

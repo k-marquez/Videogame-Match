@@ -8,6 +8,9 @@ alejandro.j.mujic4@gmail.com
 Author: Kevin Márquez
 marquezberriosk@gmail.com
 
+Author: Lewis Ochoa
+lewis8a@gmail.com
+
 This file contains the game settings that include the association of the
 inputs with an their ids, constants of values to set up the game, sounds,
 textures, frames, and fonts.
@@ -26,6 +29,7 @@ input_handler.InputHandler.set_keyboard_action(input_handler.KEY_RETURN, "enter"
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_UP, "up")
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_DOWN, "down")
 input_handler.InputHandler.set_mouse_click_action(input_handler.MOUSE_BUTTON_1, "click")
+input_handler.InputHandler.set_mouse_click_action(input_handler.MOUSE_BUTTON_3, "click2")
 input_handler.InputHandler.set_mouse_motion_action(input_handler.MOUSE_MOTION_UP, "mouse_motion")
 input_handler.InputHandler.set_mouse_motion_action(input_handler.MOUSE_MOTION_LEFT, "mouse_motion")
 input_handler.InputHandler.set_mouse_motion_action(input_handler.MOUSE_MOTION_RIGHT, "mouse_motion")
@@ -42,13 +46,13 @@ BOARD_HEIGHT = 8
 
 TILE_SIZE = 32
 
-NUM_VARIETIES = 6
+NUM_VARIETIES = 1
 NUM_COLORS = 18
 
 BACKGROUND_SCROLL_SPEED = 40
 BACKGROUND_LOOPING_POINT = -1024 + VIRTUAL_WIDTH - 4 + 51
 
-LEVEL_TIME = 600
+LEVEL_TIME = 60
 HINT_TIME = 5
 
 BASE_DIR = Path(__file__).parent
