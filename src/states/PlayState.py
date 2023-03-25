@@ -114,6 +114,7 @@ class PlayState(BaseState):
     def render(self, surface: pygame.Surface) -> NoReturn:
         # Change a NewBoardState for generating a new board
         if self.reboot_board:
+            Timer.clear()
             self.state_machine.change(
                 "newboard",
                 level=self.level,
