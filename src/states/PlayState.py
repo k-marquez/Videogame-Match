@@ -252,10 +252,10 @@ class PlayState(BaseState):
             i, j = self.__to_index(pos_x, pos_y)
             if 0 <= i < settings.BOARD_HEIGHT and 0 <= j <= settings.BOARD_WIDTH and input_data.released:
                 if self.board.tiles[i][j].powerup == True:
-                    print(f"Click en Board[{self.board.tiles[i][j].i},{self.board.tiles[i][j].j}]")
+                    self.hint_tiles = []
                     self.board.tiles[i][j].active = True
                     self.board.matches.append([self.board.tiles[i][j]])
-                    self.board.remove_matches()
+                    self.score += self.board.remove_matches() * 50
                     falling_tiles = self.board.get_falling_tiles()
 
                     def recal_matches():
