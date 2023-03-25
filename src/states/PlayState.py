@@ -183,7 +183,6 @@ class PlayState(BaseState):
                     self.highlighted_j1 = j
                
                 elif input_data.released and self.highlighted_tile:
-                    ###di, dj = self.__get_index_delta(i, j, self.highlighted_i1, self.highlighted_j1)
                     tile1 = self.board.tiles[self.highlighted_i1][self.highlighted_j1]
                     
                     # Valid movement
@@ -248,13 +247,35 @@ class PlayState(BaseState):
                         ),
                     ],
                 )
-        if input_id == "click2":
+        if input_id == "click3":
             pos_x, pos_y = self.__to_virtual_pos(input_data)
             i, j = self.__to_index(pos_x, pos_y)
             if 0 <= i < settings.BOARD_HEIGHT and 0 <= j <= settings.BOARD_WIDTH and input_data.released:
                 if self.board.tiles[i][j].powerup == True:
+                    print(f"Click en Board[{self.board.tiles[i][j].i},{self.board.tiles[i][j].j}]")
                     self.board.tiles[i][j].active = True
+                    self.board.matches.append([self.board.tiles[i][j]])
                     self.board.remove_matches()
+                    falling_tiles = self.board.get_falling_tiles()
+
+                    def recal_matches():
+                        matches = self.__get_matches([item[0] for item in falling_tiles])
+                        if matches is not None:
+                            self.__solve_matches(matches)
+                        
+                        # Check if exits almost one move
+                        while not self.can_play():
+                            delattr(self, "board")
+                            # New board if not exits movements
+                            self.board = Board(settings.VIRTUAL_WIDTH - 272, 16)
+                            # Reboot hint timer
+                            self.hint_timer = 0
+                    
+                    Timer.tween(
+                        0.25,
+                        falling_tiles,
+                        on_finish=recal_matches,
+                    )
     
     def __get_index_delta(self, i1: int, j1: int, i2:int, j2:int) -> Tuple[int, int]:
         di = abs(i1 - i2)
@@ -318,9 +339,10 @@ class PlayState(BaseState):
                     self.tiles_in_match[1].powerup = True
                     self.tiles_in_match[1].variety = self.tiles_in_match[1].variety + 1
                     self.tiles_in_match[1].type = 2
+        
         self.board.remove_matches()
         falling_tiles = self.board.get_falling_tiles()
-        
+
         def recal_matches():
             matches = self.__get_matches([item[0] for item in falling_tiles])
             if matches is not None:
@@ -333,7 +355,7 @@ class PlayState(BaseState):
                 self.board = Board(settings.VIRTUAL_WIDTH - 272, 16)
                 # Reboot hint timer
                 self.hint_timer = 0
-
+        
         Timer.tween(
             0.25,
             falling_tiles,
@@ -357,6 +379,15 @@ class PlayState(BaseState):
     def __is_there_movement(self, i: int, j: int, left: int, down: int) -> bool:
         tile1 = self.board.tiles[i][j]
         tile2 = self.board.tiles[i + down][j + left]
+        if tile1.powerup:
+            self.hint_tiles = [{"x": tile1.x, "y": tile1.y}]
+            self.hint_tiles = deepcopy(self.hint_tiles)
+            return True
+        elif tile2.powerup:
+            self.hint_tiles = [{"x": tile2.x, "y": tile2.y}]
+            self.hint_tiles = deepcopy(self.hint_tiles)
+            return True
+            
         self.__swap_tiles(tile1, tile2)
         matches = self.__get_matches([tile1, tile2])
         self.__swap_tiles(tile1, tile2)
