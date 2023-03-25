@@ -5,6 +5,12 @@ Study Case: Match-3
 Author: Alejandro Mujica
 alejandro.j.mujic4@gmail.com
 
+Author: Kevin Márquez
+marquezberriosk@gmail.com
+
+Author: Lewis Ochoa
+lewis8a@gmail.com
+
 This file contains the class BeginGameState.
 """
 from typing import Dict, Any
@@ -17,7 +23,6 @@ from gale.timer import Timer
 
 import settings
 from src.Board import Board
-
 
 class BeginGameState(BaseState):
     def enter(self, **enter_params: Dict[str, Any]) -> None:

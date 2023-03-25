@@ -5,6 +5,12 @@ Study Case: Match-3
 Author: Alejandro Mujica
 alejandro.j.mujic4@gmail.com
 
+Author: Kevin Márquez
+marquezberriosk@gmail.com
+
+Author: Lewis Ochoa
+lewis8a@gmail.com
+
 This file contains a function to fetch and store the tile frames.
 """
 from typing import List
@@ -12,7 +18,6 @@ from typing import List
 import pygame
 
 import settings
-
 
 def generate_tile_frames(spritesheet: pygame.Surface) -> List[List[pygame.Rect]]:
     frames = []

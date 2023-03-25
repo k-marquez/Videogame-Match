@@ -41,11 +41,11 @@ class PlayState(BaseState):
 
         self.active = True
 
-        self.timer = settings.LEVEL_TIME
+        self.timer = settings.CUSTOM_SETTINGS["level-time"]
         self.hint_timer = settings.HINT_TIME
         self.hint_tiles = []
 
-        self.goal_score = self.level * 1.25 * 1000
+        self.goal_score = self.level * 1.25 * settings.CUSTOM_SETTINGS["goal-score"]
 
         self.tiles_in_match = []
 
@@ -254,6 +254,8 @@ class PlayState(BaseState):
                 if self.board.tiles[i][j].powerup == True:
                     self.hint_tiles = []
                     self.board.tiles[i][j].active = True
+                    settings.SOUNDS["explosion"].stop()
+                    settings.SOUNDS["explosion"].play()
                     self.board.matches.append([self.board.tiles[i][j]])
                     self.score += self.board.remove_matches() * 50
                     falling_tiles = self.board.get_falling_tiles()
@@ -270,6 +272,8 @@ class PlayState(BaseState):
                             self.board = Board(settings.VIRTUAL_WIDTH - 272, 16)
                             # Reboot hint timer
                             self.hint_timer = 0
+                            settings.SOUNDS["board"].stop()
+                            settings.SOUNDS["board"].play()
                     
                     Timer.tween(
                         0.25,
@@ -323,21 +327,30 @@ class PlayState(BaseState):
                     self.tiles_in_match[0].powerup = True
                     self.tiles_in_match[0].variety = self.tiles_in_match[0].variety + 5
                     self.tiles_in_match[0].type = 1
+                    settings.SOUNDS["powerup1"].stop()
+                    settings.SOUNDS["powerup1"].play()
 
                 if tile == self.tiles_in_match[1]:
                     self.tiles_in_match[1].powerup = True
                     self.tiles_in_match[1].variety = self.tiles_in_match[1].variety + 5
                     self.tiles_in_match[1].type = 1
+                    settings.SOUNDS["powerup1"].stop()
+                    settings.SOUNDS["powerup1"].play()
+
             if size_m >= 5:
                 if tile == self.tiles_in_match[0]:
                     self.tiles_in_match[0].powerup = True
                     self.tiles_in_match[0].variety = self.tiles_in_match[0].variety + 1
                     self.tiles_in_match[0].type = 2
+                    settings.SOUNDS["powerup2"].stop()
+                    settings.SOUNDS["powerup2"].play()
 
                 if tile == self.tiles_in_match[1]:
                     self.tiles_in_match[1].powerup = True
                     self.tiles_in_match[1].variety = self.tiles_in_match[1].variety + 1
                     self.tiles_in_match[1].type = 2
+                    settings.SOUNDS["powerup2"].stop()
+                    settings.SOUNDS["powerup2"].play()
 
         self.score += self.board.remove_matches() * 50
         falling_tiles = self.board.get_falling_tiles()
@@ -354,6 +367,8 @@ class PlayState(BaseState):
                 self.board = Board(settings.VIRTUAL_WIDTH - 272, 16)
                 # Reboot hint timer
                 self.hint_timer = 0
+                settings.SOUNDS["board"].stop()
+                settings.SOUNDS["board"].play()
         
         Timer.tween(
             0.25,

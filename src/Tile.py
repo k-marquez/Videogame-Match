@@ -17,7 +17,6 @@ import pygame
 
 import settings
 
-
 class Tile:
     def __init__(self, i: int, j: int, color: int, variety: int) -> None:
         self.i = i

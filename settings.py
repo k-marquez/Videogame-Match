@@ -55,6 +55,8 @@ BACKGROUND_LOOPING_POINT = -1024 + VIRTUAL_WIDTH - 4 + 51
 LEVEL_TIME = 60
 HINT_TIME = 5
 
+GOAL_SCORE = 1000
+
 BASE_DIR = Path(__file__).parent
 
 TEXTURES = {
@@ -73,6 +75,10 @@ SOUNDS = {
     "match": pygame.mixer.Sound(BASE_DIR / "sounds" / "match.wav"),
     "next-level": pygame.mixer.Sound(BASE_DIR / "sounds" / "next-level.wav"),
     "select": pygame.mixer.Sound(BASE_DIR / "sounds" / "select.wav"),
+    "powerup1": pygame.mixer.Sound(BASE_DIR / "sounds" / "powerup1.wav"),
+    "powerup2": pygame.mixer.Sound(BASE_DIR / "sounds" / "powerup2.wav"),
+    "explosion": pygame.mixer.Sound(BASE_DIR / "sounds" / "explosion.wav"),
+    "board": pygame.mixer.Sound(BASE_DIR / "sounds" / "board.wav"),
 }
 
 pygame.mixer.music.load(BASE_DIR / "sounds" / "music.mp3")
@@ -84,4 +90,10 @@ FONTS = {
     "medium": pygame.font.Font(BASE_DIR / "fonts" / "font.ttf", 24),
     "large": pygame.font.Font(BASE_DIR / "fonts" / "font.ttf", 48),
     "huge": pygame.font.Font(BASE_DIR / "fonts" / "font.ttf", 64),
+}
+
+CUSTOM_SETTINGS = {
+    "goal-score": GOAL_SCORE,
+    "level-time": LEVEL_TIME,
+    "num-colors": NUM_COLORS
 }

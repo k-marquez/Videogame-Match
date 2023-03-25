@@ -11,20 +11,20 @@ marquezberriosk@gmail.com
 Author: Lewis Ochoa
 lewis8a@gmail.com
 
-This file contains the class StartState.
+This file contains the class SettingsState.
 """
 import random
 
 import pygame
 
 from gale.input_handler import InputHandler, InputData
-from gale.state_machine import BaseState, StateMachine
+from gale.state_machine import BaseState
 from gale.text import render_text
 from gale.timer import Timer
 
 import settings
 
-class StartState(BaseState):
+class SettingsState(BaseState):
     # colors we'll use to change the title text
     colors = [
         (217, 87, 99),
@@ -40,10 +40,6 @@ class StartState(BaseState):
 
     # A list of frames just for display.
     frames = []
-
-    def __init__(self, state_machine: StateMachine, game) -> None:
-        super().__init__(state_machine)
-        self.game = game
 
     def enter(self) -> None:
         self.current_menu_item = 1
@@ -137,7 +133,7 @@ class StartState(BaseState):
             pygame.Rect(0, 0, settings.VIRTUAL_WIDTH, settings.VIRTUAL_HEIGHT),
         )
         surface.blit(self.screen_alpha_surface, (0, 0))
-
+    
     def on_input(self, input_id: str, input_data: InputData) -> None:
         if not self.active:
             return
@@ -157,20 +153,35 @@ class StartState(BaseState):
         elif input_id == "enter" and input_data.pressed:
             if self.current_menu_item == 1:
                 self.active = False
-                Timer.tween(
-                    1,
-                    [(self, {"alpha_transition": 255})],
-                    on_finish=lambda: self.state_machine.change("begin"),
-                )
-            elif self.current_menu_item == 2:
-                self.active = False
+                settings.CUSTOM_SETTINGS["goal-score"] = 5000
+                settings.CUSTOM_SETTINGS["level-time"] = 180
+                settings.CUSTOM_SETTINGS["num-colors"] = 4
                 Timer.tween(
                     0.3,
                     [(self, {"alpha_transition": 255})],
-                    on_finish=lambda: self.state_machine.change("settings"),
+                    on_finish=lambda: self.state_machine.change("start"),
+                )
+            
+            elif self.current_menu_item == 2:
+                self.active = False
+                settings.CUSTOM_SETTINGS["goal-score"] = 2500
+                settings.CUSTOM_SETTINGS["level-time"] = 90
+                settings.CUSTOM_SETTINGS["num-colors"] = 9
+                Timer.tween(
+                    0.3,
+                    [(self, {"alpha_transition": 255})],
+                    on_finish=lambda: self.state_machine.change("start"),
                 )
             else:
-                self.game.quit()
+                self.active = False
+                settings.CUSTOM_SETTINGS["goal-score"] = 1000
+                settings.CUSTOM_SETTINGS["level-time"] = 60
+                settings.CUSTOM_SETTINGS["num-colors"] = 18
+                Timer.tween(
+                    0.3,
+                    [(self, {"alpha_transition": 255})],
+                    on_finish=lambda: self.state_machine.change("start"),
+                )
 
     def __draw_match3_text(self, surface: pygame.Surface, y: int) -> None:
         # draw semi-transparent rect behind MATCH 3
@@ -204,7 +215,7 @@ class StartState(BaseState):
 
         render_text(
             surface,
-            "Start",
+            "Easy",
             settings.FONTS["medium"],
             settings.VIRTUAL_WIDTH // 2,
             settings.VIRTUAL_HEIGHT // 2 + y + 15,
@@ -219,7 +230,7 @@ class StartState(BaseState):
 
         render_text(
             surface,
-            "Difficulty Level",
+            "Medium",
             settings.FONTS["medium"],
             settings.VIRTUAL_WIDTH // 2,
             settings.VIRTUAL_HEIGHT // 2 + y + 45,
@@ -234,7 +245,7 @@ class StartState(BaseState):
 
         render_text(
             surface,
-            "Quit Game",
+            "Hard",
             settings.FONTS["medium"],
             settings.VIRTUAL_WIDTH // 2,
             settings.VIRTUAL_HEIGHT // 2 + y + 75,

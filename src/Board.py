@@ -22,7 +22,6 @@ import random
 import settings
 from src.Tile import Tile
 
-
 class Board:
     def __init__(self, x: int, y: int) -> None:
         self.x = x
@@ -57,9 +56,9 @@ class Board:
         ]
         for i in range(settings.BOARD_HEIGHT):
             for j in range(settings.BOARD_WIDTH):
-                color = random.randint(0, settings.NUM_COLORS - 1)
+                color = random.randint(0, settings.CUSTOM_SETTINGS["num-colors"] - 1)
                 while self.__is_match_generated(i, j, color):
-                    color = random.randint(0, settings.NUM_COLORS - 1)
+                    color = random.randint(0, settings.CUSTOM_SETTINGS["num-colors"] - 1)
 
                 self.tiles[i][j] = Tile(
                     i, j, color, random.randint(0, settings.NUM_VARIETIES - 1)
@@ -175,6 +174,8 @@ class Board:
                                     if self.tiles[tile.i][tile.j].color == self.tiles[i][j].color:
                                         self.tiles[i][j] = None
                                         count = count + 1
+                    settings.SOUNDS["explosion"].stop()
+                    settings.SOUNDS["explosion"].play()
                     self.tiles[tile.i][tile.j] = None
                     count = count + 1
                     break
@@ -228,7 +229,7 @@ class Board:
                     tile = Tile(
                         i,
                         j,
-                        random.randint(0, settings.NUM_COLORS - 1),
+                        random.randint(0, settings.CUSTOM_SETTINGS["num-colors"] - 1),
                         random.randint(0, settings.NUM_VARIETIES - 1),
                     )
                     tile.y -= settings.TILE_SIZE

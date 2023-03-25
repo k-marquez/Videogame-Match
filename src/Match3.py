@@ -5,6 +5,12 @@ Study Case: Match-3
 Author: Alejandro Mujica
 alejandro.j.mujic4@gmail.com
 
+Author: Kevin Márquez
+marquezberriosk@gmail.com
+
+Author: Lewis Ochoa
+lewis8a@gmail.com
+
 This file contains the class Match3 as a specialization of gale.Game
 """
 import pygame
@@ -16,7 +22,6 @@ from gale.state_machine import StateMachine
 import settings
 from src import states
 
-
 class Match3(Game):
     def init(self) -> None:
         pygame.mixer.music.play(loops=-1)
@@ -26,6 +31,7 @@ class Match3(Game):
                 "begin": states.BeginGameState,
                 "play": states.PlayState,
                 "game-over": states.GameOverState,
+                "settings": states.SettingsState,
             }
         )
         self.state_machine.change("start")

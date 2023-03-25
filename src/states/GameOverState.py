@@ -5,6 +5,12 @@ Study Case: Match-3
 Author: Alejandro Mujica
 alejandro.j.mujic4@gmail.com
 
+Author: Kevin Márquez
+marquezberriosk@gmail.com
+
+Author: Lewis Ochoa
+lewis8a@gmail.com
+
 This file contains the class GameOverState.
 """
 import pygame
@@ -14,7 +20,6 @@ from gale.state_machine import BaseState
 from gale.text import render_text
 
 import settings
-
 
 class GameOverState(BaseState):
     def enter(self, score: int) -> None:
