@@ -154,7 +154,8 @@ class Board:
 
         return self.matches if len(self.matches) > 0 else None
 
-    def remove_matches(self) -> None:
+    def remove_matches(self) -> int:
+        count = 0
         for match in self.matches:
             for tile in match:
                 if tile.powerup == True and tile.active == True:
@@ -162,20 +163,26 @@ class Board:
                         for i in range(settings.BOARD_HEIGHT):
                             if self.tiles[tile.i][tile.j] != self.tiles[i][tile.j]  and self.tiles[i][tile.j] != None:
                                 self.tiles[i][tile.j] = None
+                                count = count + 1
                         for j in range(settings.BOARD_WIDTH):
                             if self.tiles[tile.i][tile.j] != self.tiles[tile.i][j]  and self.tiles[tile.i][j] != None:
                                 self.tiles[tile.i][j] = None
+                                count = count + 1
                     if tile.type == 2:
                         for i in range(settings.BOARD_HEIGHT):
                             for j in range(settings.BOARD_WIDTH):
                                 if self.tiles[tile.i][tile.j] != self.tiles[i][j] and self.tiles[i][j] != None:
                                     if self.tiles[tile.i][tile.j].color == self.tiles[i][j].color:
                                         self.tiles[i][j] = None
+                                        count = count + 1
                     self.tiles[tile.i][tile.j] = None
+                    count = count + 1
                     break
                 if tile.powerup == False:
+                    count = count + 1
                     self.tiles[tile.i][tile.j] = None
         self.matches = []
+        return count
 
     def get_falling_tiles(self) -> Tuple[Any, Dict[str, Any]]:
         # List of tweens to create
