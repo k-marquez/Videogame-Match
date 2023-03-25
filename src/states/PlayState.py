@@ -326,33 +326,48 @@ class PlayState(BaseState):
             for tile in match:
                 if tile.powerup:
                     tile.active = True
-            if size_m == 4 and tile.powerup == False:
-                if tile == self.tiles_in_match[0]:
-                    self.tiles_in_match[0].powerup = True
-                    self.tiles_in_match[0].variety = self.tiles_in_match[0].variety + 5
-                    self.tiles_in_match[0].type = 1
-                    settings.SOUNDS["powerup1"].stop()
-                    settings.SOUNDS["powerup1"].play()
+                if size_m == 4 and tile.powerup == False:
+                    if tile == self.tiles_in_match[0]:
+                        self.tiles_in_match[0].powerup = True
+                        self.tiles_in_match[0].variety = self.tiles_in_match[0].variety + 5
+                        self.tiles_in_match[0].type = 1
+                        settings.SOUNDS["powerup1"].stop()
+                        settings.SOUNDS["powerup1"].play()
 
-                if tile == self.tiles_in_match[1]:
-                    self.tiles_in_match[1].powerup = True
-                    self.tiles_in_match[1].variety = self.tiles_in_match[1].variety + 5
-                    self.tiles_in_match[1].type = 1
-                    settings.SOUNDS["powerup1"].stop()
-                    settings.SOUNDS["powerup1"].play()
+                    elif tile == self.tiles_in_match[1]:
+                        self.tiles_in_match[1].powerup = True
+                        self.tiles_in_match[1].variety = self.tiles_in_match[1].variety + 5
+                        self.tiles_in_match[1].type = 1
+                        settings.SOUNDS["powerup1"].stop()
+                        settings.SOUNDS["powerup1"].play()
 
-            if size_m >= 5:
-                if tile == self.tiles_in_match[0]:
-                    self.tiles_in_match[0].powerup = True
-                    self.tiles_in_match[0].variety = self.tiles_in_match[0].variety + 1
-                    self.tiles_in_match[0].type = 2
+                if size_m >= 5:
+                    if tile == self.tiles_in_match[0]:
+                        self.tiles_in_match[0].powerup = True
+                        self.tiles_in_match[0].variety = self.tiles_in_match[0].variety + 1
+                        self.tiles_in_match[0].type = 2
+                        settings.SOUNDS["powerup2"].stop()
+                        settings.SOUNDS["powerup2"].play()
+
+                    elif tile == self.tiles_in_match[1]:
+                        self.tiles_in_match[1].powerup = True
+                        self.tiles_in_match[1].variety = self.tiles_in_match[1].variety + 1
+                        self.tiles_in_match[1].type = 2
+                        settings.SOUNDS["powerup2"].stop()
+                        settings.SOUNDS["powerup2"].play()
+            
+            if not self.tiles_in_match[0].powerup and not self.tiles_in_match[1].powerup:
+                if size_m == 4:
+                    match[0].powerup = True
+                    match[0].variety = match[0].variety + 5
+                    match[0].type = 1
                     settings.SOUNDS["powerup2"].stop()
                     settings.SOUNDS["powerup2"].play()
-
-                if tile == self.tiles_in_match[1]:
-                    self.tiles_in_match[1].powerup = True
-                    self.tiles_in_match[1].variety = self.tiles_in_match[1].variety + 1
-                    self.tiles_in_match[1].type = 2
+                
+                elif size_m >= 5:
+                    match[0].powerup = True
+                    match[0].variety = match[0].variety + 1
+                    match[0].type = 2
                     settings.SOUNDS["powerup2"].stop()
                     settings.SOUNDS["powerup2"].play()
 
