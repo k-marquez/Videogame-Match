@@ -298,7 +298,7 @@ class PlayState(BaseState):
             for tile in match:
                 if tile.powerup:
                     tile.active = True
-            if size_m == 4:
+            if size_m == 4 and tile.powerup == False:
                 if tile == self.tiles_in_match[0]:
                     self.tiles_in_match[0].powerup = True
                     self.tiles_in_match[0].variety = self.tiles_in_match[0].variety + 5
