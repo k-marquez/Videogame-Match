@@ -315,11 +315,10 @@ class PlayState(BaseState):
 
         for match in matches:
             size_m = len(match)
-            self.score += size_m * 50
             for tile in match:
                 if tile.powerup:
                     tile.active = True
-            if size_m == 4:
+            if size_m == 4 and tile.powerup == False:
                 if tile == self.tiles_in_match[0]:
                     self.tiles_in_match[0].powerup = True
                     self.tiles_in_match[0].variety = self.tiles_in_match[0].variety + 5
@@ -339,8 +338,8 @@ class PlayState(BaseState):
                     self.tiles_in_match[1].powerup = True
                     self.tiles_in_match[1].variety = self.tiles_in_match[1].variety + 1
                     self.tiles_in_match[1].type = 2
-        
-        self.board.remove_matches()
+
+        self.score += self.board.remove_matches() * 50
         falling_tiles = self.board.get_falling_tiles()
 
         def recal_matches():
