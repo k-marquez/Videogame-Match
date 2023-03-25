@@ -40,12 +40,13 @@ class PlayState(BaseState):
         self.highlighted_tile = False
 
         self.active = True
+        self.reboot_board = False
 
-        self.timer = settings.CUSTOM_SETTINGS["level-time"]
+        self.timer = enter_params.get("timer", settings.CUSTOM_SETTINGS["level-time"])
+        self.goal_score = self.level * 1.25 * settings.CUSTOM_SETTINGS["goal-score"]
+        
         self.hint_timer = settings.HINT_TIME
         self.hint_tiles = []
-
-        self.goal_score = self.level * 1.25 * settings.CUSTOM_SETTINGS["goal-score"]
 
         self.tiles_in_match = []
 
@@ -77,9 +78,8 @@ class PlayState(BaseState):
             self.text_alpha_surface, (56, 56, 56, 234), pygame.Rect(0, 0, 212, 136)
         )
 
-        while not self.can_play():
-            delattr(self, "board")
-            self.board = Board(settings.VIRTUAL_WIDTH - 272, 16)
+        if not self.can_play():
+            self.reboot_board = True
 
         def decrement_timer():
             self.timer -= 1
@@ -112,6 +112,15 @@ class PlayState(BaseState):
             self.state_machine.change("begin", level=self.level + 1, score=self.score)
 
     def render(self, surface: pygame.Surface) -> NoReturn:
+        # Change a NewBoardState for generating a new board
+        if self.reboot_board:
+            self.state_machine.change(
+                "newboard",
+                level=self.level,
+                board=self.board,
+                score=self.score,
+                timer=self.timer,)
+             
         self.board.render(surface)
 
         if self.highlighted_tile:
@@ -266,14 +275,8 @@ class PlayState(BaseState):
                             self.__solve_matches(matches)
                         
                         # Check if exits almost one move
-                        while not self.can_play():
-                            delattr(self, "board")
-                            # New board if not exits movements
-                            self.board = Board(settings.VIRTUAL_WIDTH - 272, 16)
-                            # Reboot hint timer
-                            self.hint_timer = 0
-                            settings.SOUNDS["board"].stop()
-                            settings.SOUNDS["board"].play()
+                        if not self.can_play():
+                            self.reboot_board = True                           
                     
                     Timer.tween(
                         0.25,
@@ -361,14 +364,8 @@ class PlayState(BaseState):
                 self.__solve_matches(matches)
             
             # Check if exits almost one move
-            while not self.can_play():
-                delattr(self, "board")
-                # New board if not exits movements
-                self.board = Board(settings.VIRTUAL_WIDTH - 272, 16)
-                # Reboot hint timer
-                self.hint_timer = 0
-                settings.SOUNDS["board"].stop()
-                settings.SOUNDS["board"].play()
+            if not self.can_play():
+                self.reboot_board = True
         
         Timer.tween(
             0.25,

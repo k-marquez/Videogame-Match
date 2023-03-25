@@ -87,6 +87,7 @@ pygame.font.init()
 
 FONTS = {
     "small": pygame.font.Font(BASE_DIR / "fonts" / "font.ttf", 12),
+    "small-medium": pygame.font.Font(BASE_DIR / "fonts" / "font.ttf", 18),
     "medium": pygame.font.Font(BASE_DIR / "fonts" / "font.ttf", 24),
     "large": pygame.font.Font(BASE_DIR / "fonts" / "font.ttf", 48),
     "huge": pygame.font.Font(BASE_DIR / "fonts" / "font.ttf", 64),

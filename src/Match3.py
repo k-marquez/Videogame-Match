@@ -31,6 +31,7 @@ class Match3(Game):
                 "begin": states.BeginGameState,
                 "play": states.PlayState,
                 "game-over": states.GameOverState,
+                "newboard": states.NewBoardState,
                 "settings": states.SettingsState,
             }
         )
