@@ -55,7 +55,7 @@ Ya se nos olvidaron, **si quiere revise el requirements.txt**. Siga los 3 simple
 1918. Y finalmente ejecute: ```python main.py```
 1919. Lo que lo llevará a la ventaja para cancelar ciento quinientos pugtros en efectivo (Deberá introducir el efectivo en la unidad de CD)
 
-**Nota:** Si faltó algún paso discúlpenos, el que redactó este README es disléxico.
+**Nota:** Si faltó algún pasos discúlpenos, el que redactó este README es disléxico.
 
 ## Licencia
 
@@ -67,7 +67,7 @@ Este software está patentando bajo la licencia Creative Communist of Republican
 
 - Use el dedo índice (No pregunte por qué) para posicionarlo sobre el touchpad de su portátil, una vez allí tiene 2 opciones: desplazar el dedo para mover el puntero o no mover el dedo para no desplazar el puntero. Tenga en cuenta que estas acciones son mutuamente excluyentes.
 - Luego del breve tuto de como usar su dedo índice como un pro ya está listo para jugar.
-- Use el dedo pulgar y anular para hacer clic sobre la ficha que desea mover, y luego arrastre su dedo índice por el touchpad hacia la posición desea, luego suelte y si Diosito lo ayuda, el algoritmo funcionará y hará match de las fichas.
+- Use el dedo pulgar y anular para hacer clic sobre la ficha que desea mover, y luego arrastre su dedo índice por el touchpad hacia la posición deseada, luego suelte y si Diosito lo ayuda, el algoritmo funcionará y hará match de las fichas.
 - Adicionalmente puede usar su dedo anular para activar fichas con poderes especiales (Ficha con estrella rompe la fila y columna donde se encuentra la ficha, Ficha con X rompe todas las fichas de ese color en el tablero con el mismo color "**Nota marginal:** No recordamos si es así o al revés XD"), para activar debe hacer presión de 2 atm sobre el clic secundario. No recomendamos presiones mayores por cuestiones de costos.
 
 **Recomendaciones para PROS:**
@@ -79,4 +79,4 @@ Este software está patentando bajo la licencia Creative Communist of Republican
 
 ## Desarrolladores
 
-El remake fue hecho por El Lewis Ocho (@lewis8a) y Le BIZAK (@k-marquez)
+El remake fue hecho por El Lewis Ochoa (@lewis8a) y Le BIZAK (@k-marquez)
